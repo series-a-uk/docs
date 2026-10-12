@@ -1,0 +1,24 @@
+---
+title: "Gotchas"
+description: "Lessons from production use of the AdvisorOS CLI."
+---
+
+## Duplicates on the calendar
+
+Duplicate posts appear when two content strategies write into one calendar (e.g. a strategy created twice, one minute apart). Dedupe by title, keep the oldest copy, verify with a re-list.
+
+## Taplio resurrection
+
+Taplio re-sync (every 15 minutes) can re-import deleted posts minutes later with new ids. After any delete: re-list and verify by body-text match. Delete twice if needed. If a post keeps resurrecting, the fix belongs at the Taplio source (app.taplio.com), not the calendar layer.
+
+## Lead filtering lies
+
+`GET /campaigns?lead_email=` works; the UI list filter does not. Always verify leads through the API.
+
+## Cross-workspace writes
+
+A workspace key can sometimes READ another workspace but rejects WRITES with "This workspace key is not authorized for the requested workspace_id". Use the admin key for multi-workspace work, with explicit `--workspace`.
+
+## Timezones
+
+Calendar times are UTC; LinkedIn and Taplio display them in local time (+1/+2). The same post can look like a different day in different views. Dedupe by body text, not by date alone.

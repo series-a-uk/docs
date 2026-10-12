@@ -1,0 +1,21 @@
+---
+title: "Jobs"
+description: "The cron and scheduled-work landscape."
+---
+
+## Scheduled work
+
+| Schedule | Job |
+|---|---|
+| 03:30 UTC nightly | VPS backup |
+| 06:15 UTC daily | CRM data pipeline (`run_daily.sh`: Stripe → build tables → Supabase sync → persist → Wise) |
+| every 2 min | CRM calendar dispatch worker |
+| every 15 min | Taplio calendar sync (can resurrect deleted posts; verify after deletes) |
+| 9am UK | Daily brief to Francis (9-5 UK window) |
+| Mon/Thu 07:30 UK | Growth Ops brief (cron 2da6697ca197) |
+
+## Long-running work patterns
+
+- Foreground commands cap at 10 minutes; use background processes with completion notifications for builds and renders.
+- Renders (Remotion) are CPU-bound: budget ~0.3x realtime at 1080p per job, 3 concurrent max on this box.
+- The video API queue caps at 3 concurrent with FIFO overflow.

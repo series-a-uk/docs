@@ -1,0 +1,24 @@
+---
+title: "SSO"
+description: "How Series-X apps authenticate against Madnion."
+---
+
+## The Series-X CRM app
+
+- App: `Series-X CRM` (`app_zkXUugCWwr4jnAav7vBEOskx`) in workspace `pym4`
+- Redirect: `https://crm.series-x.ai/auth/callback`
+- Allowed origin: `https://crm.series-x.ai`
+- Login methods: password + Google, ecosystem mode, auto-add-to-workspace, email OTP + TOTP
+
+## Flow
+
+1. The SPA (auth.html) signs the user in against the edge function: `POST /auth/password` (or `/auth/mfa`, or `/auth/social-start` for Google).
+2. Tokens land in sessionStorage; the edge function checks CRM-admin membership via `GET /auth/whoami`.
+3. `cloud-client.js` bridges to the nginx gate: `POST /auth/session` with the token → the session service validates the token through the same Supabase endpoint and issues the `crm_sso` cookie.
+4. Every data call sends `Authorization: Bearer <token>` to the edge function, which re-verifies per request.
+
+Client secrets live in `/etc/crm-integrations.env` on the VPS. Never in the repo or the browser bundle.
+
+## Headless login (for agents/scripts)
+
+Madnion supports email + password headless login with an inline email-code/TOTP step. The CRM session service implements it server-side. For new integrations prefer the app-scoped flow above.

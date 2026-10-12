@@ -1,0 +1,35 @@
+---
+title: "Data Layer"
+description: "Nightly jobs, datasets and live events."
+---
+
+## Nightly 06:15 UTC
+
+`/root/crm-refresh/run_daily.sh`:
+
+1. `crm_pull.py` — Stripe pull → JSON caches (clients, subs, invoices, payments)
+2. `build_tables.py` — rebuilds the billing page's data sections from the JSON
+3. `import-datasets.js` — syncs all datasets into Supabase `crm_datasets`
+4. `persist-supabase.js` — cashflow snapshot + subscriptions upsert
+5. `wise_pull.py` + `payments_out_vendors.py` — Wise balances and outgoing payments
+
+## Live events
+
+`stripe-webhook` (signature-verified) fires on subscription created/updated/cancelled and payments, and runs the same persist step. A cancellation at 3pm is in Supabase by 3pm.
+
+## Datasets
+
+Table `public.crm_datasets` (columns: `name`, `payload` jsonb, `source`, `imported_at`). The edge function route `/datasets/<name>` serves them; pages fetch via `crmJson('/datasets/x')`.
+
+| Dataset | Source |
+|---|---|
+| `billing` | main content of the rebuilt billing page |
+| `payments-out`, `wise-deepdive`, `crm-data`, `pipeline`, `cashflow` | nightly JSON files verbatim |
+| `subscriptions` | live `crm_subscriptions` table |
+| `reports`, `updates` | one-off imports (static-ish) |
+
+Manual resync any time: `node /root/crm-refresh/import-datasets.js`.
+
+## Database access
+
+Reach Supabase Postgres via the pooler: `aws-1-eu-west-1.pooler.supabase.com:6543`. The direct db host is unreachable over IPv6 from the VPS.

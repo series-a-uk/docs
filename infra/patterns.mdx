@@ -1,0 +1,23 @@
+---
+title: "Patterns & Pitfalls"
+description: "Deployment patterns and known failure classes."
+---
+
+## Deployment patterns
+
+- **Static pages**: rsync to `/var/www/<site>/`; nginx serves.
+- **Node services**: code in `/opt/<service>/`, systemd unit in `/etc/systemd/system/`, secrets via `EnvironmentFile`. `systemctl restart <service>`.
+- **Nginx changes**: back up the vhost → edit → `nginx -t` → `systemctl reload nginx`.
+- **Repo-first**: commit before and after deploys so history stays current. The CRM repo is `series-a-uk/series-x-crm`; the docs repo is `series-a-uk/docs`.
+
+## TLS
+
+certbot per subdomain (`/etc/letsencrypt/live/<host>/`). New subdomain: create the vhost with a `.well-known/acme-challenge` location pointing at `/var/www/certbot`, obtain the cert, reload.
+
+## Known failure classes
+
+- `crm-api` wedged Postgres client → `systemctl restart crm-api` fixes it every time.
+- Supabase direct DB host unreachable over IPv6 → always use the `aws-1-eu-west-1.pooler.supabase.com:6543` pooler.
+- Taplio re-sync resurrects deleted calendar posts → delete twice, verify by body-text match.
+- systemd `PrivateTmp` blocks service log files in `/tmp` → log to `/var/log/nginx/` instead.
+- manim is unusable on this box (numpy X86_V2 CPU baseline error) — use PIL + ffmpeg instead.

@@ -1,0 +1,32 @@
+---
+title: "Overview"
+description: "The CRM portal at crm.series-x.ai."
+---
+
+The CRM portal at [crm.series-x.ai](https://crm.series-x.ai). Vanilla-JS SPA, Madnion SSO, Supabase backend (Postgres + edge functions).
+
+## Pages
+
+| Page | Route | Data source |
+|---|---|---|
+| Dashboard | `/crm/dashboard.html` | Supabase (`cashflow_snapshots`, `crm_subscriptions`) |
+| Opportunities | `/crm/pipeline.html` | `proposals` table |
+| Ideas canvas | `/crm/ideas.html` | mind-maps tables |
+| Proposals | `/crm/proposals.html` | `proposals` table |
+| Billing | `/crm/billing.html` | dataset `billing` (rebuilt nightly) |
+| Cashflow | `/crm/cashflow.html` | dataset `cashflow` + snapshots |
+| Subscriptions | `/crm/subscriptions.html` | `crm_subscriptions` + datasets `payments-out`, `wise-deepdive` |
+| Reports / Updates | | datasets `reports`, `updates` |
+| Projects | | ClickUp PMS proxy |
+| Knowledge / Meetings | | AdvisorPro read integration |
+
+## Repository and deployment
+
+- Repo: `github.com/series-a-uk/series-x-crm` (private), working copy `/root/crm-repo`.
+- Pages: rsync `crm-pages/` into `/var/www/proposals/crm/`.
+- Services: copy to `/opt/crm-integrations/`, then `systemctl restart <service>`.
+- Tests: `node tests/session-bridge.mjs` after any auth change.
+
+<Note>
+Client proposal realms (`/roshni/`, `/richard-bennett/`, etc.) stay on classic basic auth deliberately. Do not convert them to SSO.
+</Note>

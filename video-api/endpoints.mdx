@@ -1,0 +1,46 @@
+---
+title: "Endpoints"
+description: "Video Render API endpoint reference."
+---
+
+## POST /render
+
+Submit a render job. Returns immediately.
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `composition` | string | yes | Composition id from the Root registry |
+| `props` | object | no | Props passed to the composition (titles, colours, data) |
+| `codec` | string | no | `h264` (default), `vp8`, `vp9`, `prores` |
+
+```bash
+curl -X POST http://127.0.0.1:8800/render \
+  -H "X-API-Key: $VIDEO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"composition":"SeriesXIntro","props":{"title":"Hello"},"codec":"h264"}'
+```
+
+Response: `{"jobId":"job_x7k2m9a1p3","state":"queued"}`
+
+## GET /status/:jobId
+
+Returns `{id, state, progress, composition, error}`.
+
+`state` is one of `queued`, `rendering`, `done`, `error`. On `error`, `error` carries a short message.
+
+## GET /download/:jobId
+
+Streams the mp4. Only valid once `state=done`; 404 otherwise.
+
+## GET /health
+
+No auth. Returns `{ok, activeJobs, queued, maxConcurrent}`.
+
+## Errors
+
+| Status | Meaning |
+|---|---|
+| 400 | Missing `composition` or malformed JSON |
+| 401 | Missing or wrong `X-API-Key` |
+| 404 | Unknown job, or download before `done` |
+| 500 / 502 | Render failed; check `error` in the status response |

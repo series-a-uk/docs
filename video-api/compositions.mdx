@@ -1,0 +1,24 @@
+---
+title: "Compositions"
+description: "Available compositions and their props."
+---
+
+Compositions live in the Remotion project at `/opt/motion-graphics` (registry: `src/Root.tsx`).
+
+| Id | Duration | Purpose | Key props |
+|---|---|---|---|
+| `SeriesXIntro` | 4s | Branded intro card: navy background, serif title, teal-gold bar | `title`, `subtitle` |
+| `SetuPatientVideo` | 66s | Setu Dental patient explainer, 8 scenes | read-only demo |
+| `SetuBumper` | 6s | Setu Dental ad bumper | read-only demo |
+
+## Adding a composition
+
+1. Add the component and register it in `src/Root.tsx` in the `series-a-uk/series-x-crm` repository.
+2. Deploy to the box: sync `src/` into `/opt/motion-graphics/`.
+3. `systemctl restart video-api` (the bundle rebuilds on the next job).
+
+## Props rules
+
+- Props are JSON only. Request body limit is 2 MB; pass media as URLs, not base64.
+- Media URLs in props must be reachable from the VPS (use public https links).
+- House style comes from `src/setu/theme.ts` and the SeriesXIntro defaults: navy `#0f172a`, teal `#2a9d8f`, gold `#e9c46a`, serif titles, mono captions.

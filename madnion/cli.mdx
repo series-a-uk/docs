@@ -1,0 +1,31 @@
+---
+title: "CLI"
+description: "The madnion CLI grammar and resource surface."
+---
+
+`@madnion/cli` v1.4.0 installs the `madnion` and `madnion-mcp` binaries. Auth via the `MADNION_ADMIN_KEY` environment variable.
+
+## Grammar
+
+```bash
+madnion whoami
+madnion describe <resource>
+madnion skills | tools [resource]
+madnion call <resource> <action> [--key=val | --json='{...}'] [--raw]
+madnion plan --file=<plan.json>
+madnion batch --file=<jobs.json> [--dry-run] [--allow-destructive] [--continue-on-error]
+```
+
+## Resources (22)
+
+apps, users, workspaces, stripe, stripe_config, stripe_connect, plans, credits, sessions, audit, integrations, ai, proxies, emails, webhooks, linkedin, admin_keys, meta.
+
+Roughly 150 actions across them. `madnion describe <resource>` returns the full action list per resource.
+
+## Proxies
+
+Custom proxies (e.g. ClickUp) follow one schema: endpoint, auth_config, headers, actions. Create with `madnion call proxies create --json='{...}'` in the target workspace. A proxy holds the upstream secret server-side; callers never see it.
+
+## Batch operations
+
+`batch` and `plan` accept a JSON file of calls with `--dry-run` to preview and `--allow-destructive` to permit deletes. Always dry-run first.

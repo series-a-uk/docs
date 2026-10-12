@@ -1,0 +1,32 @@
+---
+title: "Overview"
+description: "server1.series-x.ai at a glance."
+---
+
+server1.series-x.ai (66.29.139.128). Ubuntu, nginx 1.24, 8 cores, 11 GB RAM, 237 GB disk. Node 22, Python 3.11. Backups nightly 03:30 UTC.
+
+No GPU: generative/diffusion video and local LLM inference are out; everything CPU-side (Remotion, PIL, ffmpeg, edge-tts) works.
+
+## Public services
+
+| Host | Port | Service |
+|---|---|---|
+| crm.series-x.ai | 443 | CRM portal (nginx → static + Supabase edge functions) |
+| agentx.series-x.ai | 443 | Open WebUI |
+| agent.series-x.ai | 443 | Hermes dashboard |
+| proposals.series-x.ai | 443 | Client proposals (basic auth realms) |
+| missioncontrol.series-x.ai | 443 | Mission Control colony (basic auth) |
+| docs.series-x.ai | 443 | This documentation site |
+
+## Internal services (127.0.0.1)
+
+| Port | Service | Purpose |
+|---|---|---|
+| 8793 | crm-madnion-sso | CRM session bridge (login, /auth/session, validate) |
+| 8798 | crm-api | Legacy CRM API (being replaced by Supabase edge) |
+| 8794 | paysched | Payment schedules |
+| 8796 | push-stripe | Stripe checkout links |
+| 8800 | video-api | Remotion render API |
+| 8791 | signbee | E-signing webhooks |
+| 5274 | missioncontrol | Colony server |
+| 9910 | hermes-gateway | WhatsApp bridge |

@@ -1,0 +1,35 @@
+---
+title: "Commands"
+description: "Command map and the scheduling actions in v1.5.0."
+---
+
+## Command map
+
+```
+advisoros content   list|get|create|update|delete|approve|bulk_approve
+                    schedule|unschedule|publish_now|bulk_schedule
+                    generate|generation_status|generation_job
+advisoros calendar  list|show|create|update|delete|schedule|unschedule|engine
+advisoros strategies ideate|create|list|show|resume|update|delete|posts|post
+advisoros campaigns …
+advisoros workspaces …
+advisoros pipelines …
+advisoros audit …
+```
+
+## Scheduling (v1.5.0)
+
+- `content unschedule <id>` — cancels a scheduled content item on whichever engine holds it (Taplio or built-in). Returns `not_scheduled: true` if the item only exists as content, with a pointer to `calendar unschedule`.
+- `calendar unschedule <id>` — cancels a calendar post and its Taplio copy. This is the one for live-scheduled posts.
+- `calendar engine --workspace <ws>` — shows which scheduler is live (`taplio` when connected, else built-in cron).
+
+## Probing unknown actions
+
+Passing a deliberately wrong action returns the supported list:
+
+```bash
+advisoros content zzz 2>&1
+# Unknown content action "zzz". Supported actions: list, get, create, ...
+```
+
+Use this to discover the full surface without docs.

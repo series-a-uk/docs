@@ -1,0 +1,44 @@
+---
+title: "Overview"
+description: "Generate branded video programmatically on the Series-X VPS."
+---
+
+Generate branded video programmatically on the Series-X VPS. Remotion-backed, queue-backed, async.
+
+**Service:** `video-api.service` on server1.series-x.ai, port 8800 (localhost-bound; expose via nginx)
+
+**Auth:** every request (except `/health`) needs an `X-API-Key` header. Key distribution: ask Colin or Alex.
+
+## Quick start
+
+```bash
+# Submit a render (returns immediately)
+curl -X POST https://video-api.series-x.ai/render \
+  -H "X-API-Key: $VIDEO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"composition":"SeriesXIntro","props":{"title":"Welcome to AdvisorPro","subtitle":"AI systems, documented and verified"},"codec":"h264"}'
+# => {"jobId":"job_x7k2m9a1p3","state":"queued"}
+
+# Poll progress
+curl -H "X-API-Key: $VIDEO_API_KEY" https://video-api.series-x.ai/status/job_x7k2m9a1p3
+# => {"id":"job_x7k2m9a1p3","state":"rendering","progress":57}
+
+# Download when state=done (200) - mp4, H.264 yuv420p
+curl -o out.mp4 -H "X-API-Key: $VIDEO_API_KEY" https://video-api.series-x.ai/download/job_x7k2m9a1p3
+```
+
+## How it works
+
+The API wraps the Remotion project at `/opt/motion-graphics`. Compositions are defined in `src/Root.tsx` in the `series-a-uk/series-x-crm` repository. Props parameterise everything: titles, colours, data. One composition, many videos.
+
+Renders run three at a time; extra jobs queue FIFO. Job state is in-memory, so a service restart clears history (outputs stay on disk at `/opt/video-api/outputs/`).
+
+## Measured throughput
+
+| Load | Wall time | Effective rate |
+|---|---|---|
+| Single 6s 1080p job | ~28s | 2.2 jobs/min |
+| 2 concurrent | 26.6s for both | 4.5 jobs/min |
+| 4 concurrent | 45s for all | 5.3 jobs/min (saturation) |
+
+A full 66-second explainer renders in about 5-7 minutes; roughly one long-form video every 2 minutes sustained. First job after a service restart pays a one-off ~40s warmup (bundle + headless Chrome).

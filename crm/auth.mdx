@@ -1,0 +1,31 @@
+---
+title: "Authentication"
+description: "The two auth layers: nginx gate and edge function."
+---
+
+```
+Browser ── nginx (crm.series-x.ai, TLS)
+            ├── /crm/*.html        SPA pages (SSO-gated: auth_request → :8793)
+            ├── /crm/*.js|css      assets (public, login page needs them)
+            ├── /auth/*            login/callback/logout → serves auth.html (SPA)
+            ├── /auth/session      POST: bridge token → crm_sso cookie; DELETE: logout
+            ├── /auth/whoami       session profile (profile widget)
+            └── /crm-api/* → edge function crm-api (Supabase, Madnion JWT)
+```
+
+Two auth layers:
+
+1. **Nginx gate** (server-side): `crm_sso` HttpOnly cookie, HMAC-signed, 12h TTL. Issued by the session service (`/opt/crm-integrations/madnion-sso.js`, port 8793) via `POST /auth/session`. The SPA bridges automatically after a successful Madnion sign-in.
+2. **Edge function auth** (data): the SPA keeps a Madnion access token in sessionStorage and sends `Authorization: Bearer` on every data call. The edge function verifies the token AND CRM-admin membership on each request.
+
+## The session bridge
+
+After a successful Supabase-backed Madnion sign-in, `cloud-client.js` calls `POST /auth/session` with the Madnion token. The service validates it through the same Supabase endpoint the CRM data uses (admin check enforced) and issues the `crm_sso` cookie. Logout does the reverse via `DELETE /auth/session`. Cookie lifetime derives from the token's actual expiry, capped at 12 hours.
+
+Both bridge routes are origin-checked against the app origin; anything else gets 403.
+
+## Pitfalls
+
+- `/crm/*.html` pages are gated; `/crm/*.js`, `/crm/*.css`, `/crm/vendor/`, `/crm/assets/` are public because the login page loads them pre-auth. Gating assets breaks the login page in a loop ("stuck on refresh").
+- Duplicating a gated assets block for the login page's own scripts causes `SyntaxError: Unexpected token '<'` (the 302 redirect serves HTML to a script tag) → `crmCloud` undefined → fetch loop.
+- After any calendar/content delete under Taplio, re-list: Taplio re-sync (every 15 min) can resurrect deleted posts. Delete twice if needed.

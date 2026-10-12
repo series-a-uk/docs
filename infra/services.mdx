@@ -1,0 +1,32 @@
+---
+title: "Services & Jobs"
+description: "Nightly jobs and how services are organised."
+---
+
+## Nightly jobs
+
+| Time (UTC) | Job |
+|---|---|
+| 03:30 | VPS backup |
+| 06:15 | `/root/crm-refresh/run_daily.sh` — Stripe pull → build tables → Supabase dataset sync → persist cashflow/subscriptions → Wise pull |
+
+## Directories
+
+| Path | Contents |
+|---|---|
+| `/opt/crm-integrations/` | CRM Node services (crm-api, madnion-sso, session-bridge, mindmap-api, send-proposal, payment_watcher, stripe-webhook) |
+| `/var/www/proposals/crm/` | CRM SPA pages |
+| `/var/www/docs/` | Docs site HTML (mirror of the `series-a-uk/docs` repo build) |
+| `/opt/motion-graphics/` | Remotion project (compositions for the video API) |
+| `/opt/video-api/` | Video render API server + outputs |
+| `/root/crm-refresh/` | Nightly data pipeline scripts |
+| `/root/crm-repo/` | Working copy of `series-a-uk/series-x-crm` |
+| `/root/crm-build/` | Builders, vhost backups, migration scripts |
+
+## Secrets
+
+Secrets live in `EnvironmentFile`s (`/etc/crm-integrations.env`, `/etc/video-api.env`) and systemd units. Never in code, never in the repo. `SECRETS.md` in the CRM repo documents the env-var contract.
+
+<Warning>
+`/etc/...` paths refuse agent file-write tools; use terminal with elevated access for those.
+</Warning>

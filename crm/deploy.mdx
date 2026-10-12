@@ -1,0 +1,35 @@
+---
+title: "Deploy"
+description: "Deploying CRM changes from the repo."
+---
+
+## Pages
+
+```bash
+rsync -av /root/crm-repo/crm-pages/ /var/www/proposals/crm/
+```
+
+Auth subpages (`auth/login`, `auth/callback`, `auth/logout`) must stay byte-identical to `auth.html`; a test asserts parity.
+
+## Services
+
+```bash
+cp crm-integrations/madnion-sso.js crm-integrations/session-bridge.js /opt/crm-integrations/
+node --check /opt/crm-integrations/madnion-sso.js
+systemctl restart crm-madnion-sso
+curl -s http://127.0.0.1:8793/health
+```
+
+Secrets live in `/etc/crm-integrations.env` (EnvironmentFile) and the systemd unit. Never in code or the repo.
+
+## Nginx
+
+Back up the vhost first (`/root/crm-build/` holds dated backups), edit, `nginx -t`, `systemctl reload nginx`. The vhost gates `/crm/*.html` via `auth_request` and leaves assets public.
+
+## Checklist for auth changes
+
+1. `node tests/session-bridge.mjs` (identity validation, expiry, admin gate, caching, logout, page parity)
+2. Unauthenticated pages still 302 to login
+3. Assets still 200 without a cookie
+4. Client proposal realms still 401 basic auth
+5. Real login click-through with a Madnion account

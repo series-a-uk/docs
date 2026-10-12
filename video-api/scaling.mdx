@@ -1,0 +1,22 @@
+---
+title: "Scaling"
+description: "Throughput today and the paths beyond one box."
+---
+
+## On this box
+
+The VPS has 8 cores and 11 GB RAM; renders are CPU-bound. Sustained capacity: roughly one 60-90 second video every 2 minutes, or dozens of short bumpers and intros per minute. That covers campaign automation, personalised client videos and CRM-triggered renders.
+
+To raise the ceiling vertically: increase `MAX_CONCURRENT` in `server.js` and move to a bigger VPS. Rendering scales linearly with core count.
+
+## Remotion Lambda
+
+The same compositions deploy to AWS Lambda nearly unchanged. The code change is swapping `renderMedia` for `renderMediaOnLambda`. Requires an AWS account and costs roughly $0.01-0.05 per video-second, scaling to hundreds of parallel renders.
+
+## Generative video (GPU)
+
+Runway, Luma, Kling, Seedance and friends need a vendor API key. None exists on the box today (verified 1 Oct: environment, Maton's 29 connections, deferred tools). The API layer would proxy the vendor behind the same endpoint shape.
+
+## Voiceover and music at scale
+
+edge-tts is free but Microsoft rate-limits per IP (about 5 concurrent). For API-scale VO: cache per script hash, or supply an ElevenLabs key. Music beds are synthesised in-house, so there is no licensing question.

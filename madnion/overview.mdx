@@ -1,0 +1,32 @@
+---
+title: "Overview"
+description: "The Madnion platform backing Series-X SSO and client workspaces."
+---
+
+Madnion is the multi-tenant workspace/app platform backing Series-X SSO, the CRM and client workspaces.
+
+Base API: `https://api.madnion.com/functions/v1/<endpoint>` — the prefix is mandatory; root-level paths 404.
+
+## Key types
+
+| Key | Use |
+|---|---|
+| `mad_admin_…` | platform admin: all workspaces, destructive ops |
+| `wak_builder_…` | builder bootstrap (`madnion bootstrap` requires this; an admin key gets NOT_FOUND) |
+| app-scoped | per-app runtime auth |
+
+Never hand customers admin or builder keys.
+
+## Workspaces
+
+| Short code | Workspace |
+|---|---|
+| `pym4` | Series-X main |
+| `cynf` | MORe (Atlas app lives here) |
+| `5lai43` | Setu Dental (AdvisorOS) |
+
+## Pitfalls
+
+- Escrow features are currently paused.
+- `madnion bootstrap` is absent from CLI v1.4.0; the HTTP path is `POST {"resource":"meta","action":"bootstrap"}` to `.../functions/v1/builder-api` and requires a `wak_builder_` key.
+- GitHub org note: the `series-a-uk` org blocks classic personal access tokens older than 366 days (unrelated to Madnion, but it bites the same workflows) — use fine-grained tokens or `gh auth login --web`.

@@ -1,0 +1,28 @@
+---
+title: "Overview"
+description: "The AdvisorOS CLI: agent operations surface."
+---
+
+The AdvisorOS CLI is the agent operations surface for AdvisorOS: campaigns, content strategies, calendar, workspaces. Current version **1.5.0**.
+
+```bash
+npm install -g @series-a/cli@latest
+```
+
+## Auth
+
+Two key types:
+
+| Key | Prefix | Scope |
+|---|---|---|
+| Workspace key | `advos_ws_<id>_…` | one workspace, read+write within it |
+| Admin key | `advos_admin_…` | all workspaces (target with `--workspace <id>`) |
+
+Config: `~/.advisoros/config.json` (profiles). Workspace override: `-w/--workspace <id>` or env `ADVISOROS_WORKSPACE_ID`. Since v1.4.1, `whoami` no longer takes `--workspace`.
+
+## Workspaces
+
+| Id | Workspace |
+|---|---|
+| `dmw9wj` | AdvisorPro (main) |
+| `5lai43` | Setu Dental (Milan) |
