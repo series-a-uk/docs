@@ -1,0 +1,44 @@
+---
+title: "Overview"
+description: "Text-to-speech on the Series-X VPS: local engines, API surface, video pipeline integration."
+---
+
+Text-to-speech runs locally on the Series-X VPS as the `video-tts` service (port 8802, localhost), surfaced through the main video API (port 8800) so callers use one endpoint set and one key.
+
+## Engines
+
+| Engine | Licence | Speed (13-word sentence) | Notes |
+|---|---|---|---|
+| `piper` (default) | MIT (check each voice file) | ~4.7s for 5.2s audio, faster than realtime | ONNX, 60MB voice, best for bulk generation |
+| `kokoro` | Apache-2.0 | ~25-31s for 5.6s audio | 82M params, noticeably better quality; use for hero videos |
+| `edge` | Microsoft cloud (free) | n/a | 403-blocked on this box since 12 Oct 2026; kept as fallback code only |
+
+All synthesis runs on CPU (this VPS has no GPU). Kokoro requires a oneDNN workaround baked into the service (`ONEDNN_MAX_CPU_ISA=SSE41` + `torch.backends.mkldnn.enabled = False`) because the VM CPU lacks AVX2.
+
+## Voices
+
+- **piper**: `en_US-lessac-medium` (default, auto-downloads), `en_GB-alba-medium`
+- **kokoro**: `af_heart` (default), `af_bella`, `bf_emma`, `am_michael`, `bm_george`
+- **edge**: `en-GB-SoniaNeural` (default), `en-US-AvaMultilingualNeural`, `en-GB-RyanNeural`, `en-US-JennyNeural`
+
+Piper voices auto-download from HuggingFace on first use (63MB + json config).
+
+## Auth
+
+Same as the render API: `X-API-Key` header. Both the master key (in `/etc/video-api.env`) and any key issued via the [API Keys UI](/video-api/keys) work.
+
+## Quick start
+
+```bash
+curl -X POST https://video-api.series-x.ai/tts \
+  -H "X-API-Key: $VIDEO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Get matched, keep smiling.","engine":"piper"}'
+# => {"id":"tts_x","engine":"piper","audioUrl":"/tts/audio/tts_x.wav","ms":4877}
+
+curl -o vo.wav https://video-api.series-x.ai/tts/audio/tts_x.wav
+```
+
+<Note>
+The audio URL is served by the main API with a 24h cache header. Output is 24kHz 16-bit WAV mono (piper) or 24kHz (kokoro).
+</Note>

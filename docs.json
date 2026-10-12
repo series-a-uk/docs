@@ -12,27 +12,62 @@
     "tabs": [
       {
         "tab": "Video Render API",
-        "pages": ["video-api/overview", "video-api/endpoints", "video-api/compositions", "video-api/scaling"]
+        "pages": [
+          "video-api/overview",
+          "video-api/endpoints",
+          "video-api/compositions",
+          "video-api/scaling"
+        ]
+      },
+      {
+        "tab": "Text-to-Speech",
+        "pages": [
+          "tts/overview",
+          "tts/endpoints",
+          "tts/voiceover-renders"
+        ]
       },
       {
         "tab": "Series-X CRM",
-        "pages": ["crm/overview", "crm/auth", "crm/data", "crm/deploy"]
+        "pages": [
+          "crm/overview",
+          "crm/auth",
+          "crm/data",
+          "crm/deploy"
+        ]
       },
       {
         "tab": "AdvisorOS CLI",
-        "pages": ["advisoros/overview", "advisoros/commands", "advisoros/gotchas"]
+        "pages": [
+          "advisoros/overview",
+          "advisoros/commands",
+          "advisoros/gotchas"
+        ]
       },
       {
         "tab": "Madnion Platform",
-        "pages": ["madnion/overview", "madnion/cli", "madnion/sso"]
+        "pages": [
+          "madnion/overview",
+          "madnion/cli",
+          "madnion/sso"
+        ]
       },
       {
         "tab": "VPS & Services",
-        "pages": ["infra/overview", "infra/services", "infra/jobs", "infra/patterns"]
+        "pages": [
+          "infra/overview",
+          "infra/services",
+          "infra/jobs",
+          "infra/patterns"
+        ]
       },
       {
         "tab": "Content Style Guide",
-        "pages": ["content/overview", "content/palettes", "content/channels"]
+        "pages": [
+          "content/overview",
+          "content/palettes",
+          "content/channels"
+        ]
       }
     ]
   }

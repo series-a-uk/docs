@@ -1,0 +1,47 @@
+---
+title: "Endpoints"
+description: "TTS endpoint reference."
+---
+
+## POST /tts
+
+Synthesise speech. Available on the main API (port 8800, which proxies the TTS service).
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `text` | string | yes | 1-5000 chars |
+| `engine` | string | no | `piper` (default), `kokoro`, `edge` |
+| `voice` | string | no | engine-appropriate voice (defaults listed on the overview page) |
+| `rate` | number | no | speech rate multiplier, default 1.0 (piper maps this to length_scale) |
+
+```bash
+curl -X POST https://video-api.series-x.ai/tts \
+  -H "X-API-Key: $VIDEO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Welcome to the practice.","engine":"kokoro","voice":"af_heart"}'
+```
+
+Response: `{"id":"tts_…","engine":"kokoro","audioUrl":"/tts/audio/tts_….wav","ms":30940}`
+
+## GET /tts/audio/:file
+
+Streams the WAV. 404 for unknown files. Cached 24h client-side.
+
+## GET /health (on 8802)
+
+`{"ok":true,"engines":{"edge":bool,"kokoro":bool,"piper":bool}}` — which engines are installed and callable. No auth.
+
+## Errors
+
+| Status | Meaning |
+|---|---|
+| 400 | Missing text, or text over 5000 chars |
+| 401 | Missing or wrong `X-API-Key` |
+| 500 | Synthesis failure (error message includes the engine's stderr excerpt) |
+| 502 | TTS microservice unreachable (via the main-API proxy) |
+
+## Performance notes
+
+- Requests are synchronous: the HTTP response returns after synthesis completes. For long scripts, expect piper ~1.1x realtime and kokoro ~4.6x realtime on this box.
+- There is no server-side queue for TTS (the render queue is separate). Client-side throttle for bulk jobs.
+- Output files accumulate in `/opt/video-api/tts-audio/` — clean periodically.

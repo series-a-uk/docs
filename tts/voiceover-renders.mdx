@@ -1,0 +1,48 @@
+---
+title: "Voiceover in Renders"
+description: "Generate a video with a synthesised voiceover in a single API call."
+---
+
+The render endpoint accepts an optional `vo` object. When present, the pipeline synthesises the voiceover and mixes it into the finished video automatically.
+
+## Single-call video + voiceover
+
+```bash
+curl -X POST https://video-api.series-x.ai/render \
+  -H "X-API-Key: $VIDEO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "composition": "SeriesXIntro",
+    "props": {"title": "Setu Dental", "subtitle": "Get matched, keep smiling"},
+    "vo": {
+      "text": "Setu means bridge. Get matched today and keep smiling.",
+      "engine": "piper",
+      "voice": "en_US-lessac-medium",
+      "rate": 1.0
+    }
+  }'
+```
+
+## How it works
+
+1. The render job is queued as usual (composition + props).
+2. After the video renders, the VO text is synthesised via the TTS service.
+3. ffmpeg mixes the VO onto the video: if the composition already has audio, the VO is mixed over it (VO padded 2s at the end, amix with `normalize=0`); if the video is silent, the VO becomes the audio track.
+4. The mux is stream-copied for video (`-c:v copy`), so no re-encode penalty.
+
+## Fields
+
+| Field | Type | Required |
+|---|---|---|
+| `vo.text` | string | yes (if `vo` present) |
+| `vo.engine` | string | no (default `piper`) |
+| `vo.voice` | string | no |
+| `vo.rate` | number | no |
+
+`vo` is rejected with 400 if present without `text`, or combined with the `video` contract (the video contract manages its own audio tracks).
+
+## Choosing an engine
+
+- **piper** for bulk, drafts, anything time-sensitive: faster than realtime.
+- **kokoro** for hero/marketing videos where voice quality matters: about 4.6x realtime on this box.
+- Cache finished audio by script hash client-side if you reuse the same VO across renders.
