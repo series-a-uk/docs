@@ -28,6 +28,13 @@
         ]
       },
       {
+        "tab": "Crawl API",
+        "pages": [
+          "crawl/overview",
+          "crawl/endpoints"
+        ]
+      },
+      {
         "tab": "Series-X CRM",
         "pages": [
           "crm/overview",

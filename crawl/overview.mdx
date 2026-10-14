@@ -1,0 +1,40 @@
+---
+title: "Overview"
+description: "Crawl and scrape any site to LLM-ready markdown. Self-hosted Crawl4AI on the Series-X VPS."
+---
+
+Crawl and scrape websites to clean, LLM-ready markdown. Self-hosted [Crawl4AI](https://github.com/unclecode/crawl4ai) (GPL-style self-hosting, free) on the Series-X VPS as the `crawl-api` service (port 8804).
+
+**Base URL:** `https://docs.series-x.ai/crawl-api/`
+**Auth:** `X-API-Key` header — same keys as the [video API](/video-api/overview) (issue via the CRM API Keys page).
+
+## Quick start
+
+```bash
+# Single page -> markdown
+curl -X POST https://docs.series-x.ai/crawl-api/scrape \
+  -H "X-API-Key: $VIDEO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://setu.dental","mode":"md"}'
+
+# Multi-page same-origin crawl (async job)
+curl -X POST https://docs.series-x.ai/crawl-api/crawl \
+  -H "X-API-Key: $VIDEO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://docs.series-x.ai","max_pages":5}'
+
+# Poll the job
+curl https://docs.series-x.ai/crawl-api/job/<jobId> -H "X-API-Key: $VIDEO_API_KEY"
+```
+
+## What it produces
+
+- **markdown** — LLM-ready markdown extracted from the rendered page (JavaScript executed)
+- **html** — full rendered HTML (mode `html` or `both`)
+- **title** and status per page
+
+Verified live: setu.dental → 11,150 chars of clean markdown; docs.series-x.ai 5-page crawl in ~25s.
+
+<Note>
+Self-hosted does not mean zero-cost: browser processes, bandwidth and storage are on our VPS. Respect site terms, robots directives and rate limits. Do not use the crawler to bypass access controls.
+</Note>

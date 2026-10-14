@@ -1,0 +1,52 @@
+---
+title: "Endpoints"
+description: "Scrape and crawl endpoint reference."
+---
+
+## POST /scrape
+
+Single page, synchronous.
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `url` | string | yes | http(s) URL |
+| `mode` | string | no | `md` (default), `html`, `both` |
+| `js` | boolean | no | JavaScript rendering, default true |
+
+Response: `{url, mode, success, status, markdown?, html?, title}`
+
+```bash
+curl -X POST https://docs.series-x.ai/crawl-api/scrape \
+  -H "X-API-Key: $VIDEO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://example.com","mode":"md"}'
+```
+
+## POST /crawl
+
+Multi-page same-origin breadth-first crawl, asynchronous.
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `url` | string | yes | start URL |
+| `max_pages` | number | no | 1-50, default 10 |
+| `mode` | string | no | `md` (default), `html`, `both` |
+
+Response: `{jobId, state}`. The crawler follows internal links from the start URL's origin only.
+
+## GET /job/:id
+
+Returns `{id, url, state, pages: [...], count}`. `state` is `queued`, `crawling`, `done` or `error`. Jobs persist to disk and survive service restarts.
+
+## GET /health
+
+No auth. `{ok, service, engine, installed}`.
+
+## Errors
+
+| Status | Meaning |
+|---|---|
+| 400 | Missing/invalid URL, bad mode, bad vo-style body |
+| 401 | Missing or wrong `X-API-Key` |
+| 502 | Crawl failed for the target page (site down, blocked, timeout) |
+| 500 | Service error; the message carries the crawler's stderr excerpt |
