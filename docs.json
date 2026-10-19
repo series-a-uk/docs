@@ -35,6 +35,12 @@
         ]
       },
       {
+        "tab": "Email API",
+        "pages": [
+          "email/overview"
+        ]
+      },
+      {
         "tab": "Series-X CRM",
         "pages": [
           "crm/overview",

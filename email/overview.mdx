@@ -1,0 +1,42 @@
+---
+title: "Overview"
+description: "Send email programmatically. SMTP-first (587 STARTTLS) with Gmail OAuth fallback."
+---
+
+Send email through the Series-X email API. Same key system as the [video API](/video-api/overview) and [crawl API](/crawl/overview).
+
+**Base URL:** `https://docs.series-x.ai/email-api/`
+**Auth:** `X-API-Key` header (keys via the CRM API Keys page).
+**Service:** `email-api.service`, port 8806.
+
+## Quick start
+
+```bash
+curl -X POST https://docs.series-x.ai/email-api/send \
+  -H "X-API-Key: $VIDEO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"to":"someone@example.com","subject":"Hello","body":"Plain text body."}'
+# => {"messageId":"...","via":"smtp-587" | "maton-gmail-oauth"}
+```
+
+## Transport selection
+
+1. **SMTP (preferred):** if `SMTP_USER` and `SMTP_PASS` are set in the service environment, mail goes out over port 587 with STARTTLS from server1.series-x.ai. Set `SMTP_HOST` (default smtp.gmail.com) and `SMTP_PORT` to override.
+2. **Gmail OAuth fallback:** without SMTP credentials, mail sends through the connected Google account (via Maton). The `via` field in the response tells you which transport was used.
+
+> Note on port 25: the VPS IP currently sits in a provider quarantine VLAN that filters outbound port 25 (STARTTLS stripped by the network). Submission ports 587/465 are unaffected. An unblock request is with Namecheap hosting support; direct SMTP relay support activates once SMTP_USER/SMTP_PASS land in the environment.
+
+## Endpoints
+
+### POST /send
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `to` | string | yes | recipient address |
+| `subject` | string | yes | |
+| `body` | string | yes | plain text |
+| `from` | string | no | overrides the configured sender |
+
+### GET /health
+
+`{ok, service, smtpReady, host, port}` — `smtpReady` true means direct SMTP transport is armed.
